@@ -1,3 +1,5 @@
+import fs from "fs";
+import subtitles from "@/data/subtitles";
 import { bundle } from "@remotion/bundler";
 import { getCompositions, renderMedia } from "@remotion/renderer";
 import path from "path";
@@ -5,8 +7,14 @@ import path from "path";
 // next js api routes
 
 export default async function handler(req, res) {
-    await start();
-    res.status(200).json({ text: 'Hello' })
+    const outputLocation = await start();
+
+    const filepath = path.resolve(outputLocation);
+    const videoBuffer = fs.readFileSync(filepath);
+    
+    res.setHeader("Content-Type", "video/mp4");
+    res.setHeader("Content-Length", videoBuffer.length);
+    res.status(200).send(videoBuffer);
 }
 
 
@@ -24,7 +32,7 @@ const start = async () => {
 
   // Parametrize the video by passing arbitrary props to your component.
   const inputProps = {
-    foo: "bar",
+    subtitles: subtitles
   };
 
   // Extract all the compositions you have defined in your project
@@ -53,6 +61,16 @@ const start = async () => {
     codec: "h264",
     outputLocation,
     inputProps,
+    timeoutInMilliseconds: 1000 * 60 * 60,
   });
-  console.log("Render done!");
+
+  console.log("Render done!", outputLocation);
+  // use this to serve the video
+  return outputLocation;
 };
+
+export const config = {
+  api: {
+    responseLimit: false,
+  },
+}
