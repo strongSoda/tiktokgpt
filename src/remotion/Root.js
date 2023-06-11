@@ -13,7 +13,7 @@ export const RemotionRoot = () => {
         component={MyComposition}
         durationInFrames={1200}
         fps={30}
-        width={1080}
+        width={500}
         height={720}
       />
       {subtitles?.map((subtitle) => (
