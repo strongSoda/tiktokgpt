@@ -5,19 +5,20 @@ import { getCompositions, renderMedia } from "@remotion/renderer";
 import path from "path";
 
 // next js api routes
-
 export default async function handler(req, res) {
     const outputLocation = await start();
 
+    // read the video file from the output location
     const filepath = path.resolve(outputLocation);
     const videoBuffer = fs.readFileSync(filepath);
     
+    // serve the video
     res.setHeader("Content-Type", "video/mp4");
     res.setHeader("Content-Length", videoBuffer.length);
     res.status(200).send(videoBuffer);
 }
 
-
+// remotion code
 const start = async () => {
   // The composition you want to render
   const compositionId = "Video";
@@ -69,6 +70,7 @@ const start = async () => {
   return outputLocation;
 };
 
+// overcome response size limit
 export const config = {
   api: {
     responseLimit: false,
