@@ -1,40 +1,53 @@
+import React from "react";
 import { Player } from "@remotion/player";
 import { MyComposition } from "@/remotion/Composition";
 import subtitles from "@/data/subtitles";
+import Nav from "@/app/components/Nav";
+import { Heading, Box, Button, Image } from '@chakra-ui/react'
+import { RenderLoading, RenderPoster } from "@/app/components/RenderAssets";
 
 const Home = () => {
-    return (
-        <div>
-            <h1>Home</h1>
-            <Player
-                component={MyComposition}
-                inputProps={{ subtitles: subtitles }}
-                durationInFrames={1200}
-                compositionWidth={1080}
-                compositionHeight={720}
-                fps={30}
-                controls
-                />
 
-            {/* button on clcik call /api/render which returns an mp4 download it */}
-            <button 
-                onClick={() => {
-                    fetch('/api/render')
-                    .then((res) => res.json())
-                    .then((data) => {
-                        console.log(data)
-                        // the data is the mp4 file so we can download it
-                        const link = document.createElement('a');
-                        link.href = data;
-                        link.download = 'video.mp4';
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-                    })
-                }}
-            >Download</button>
-        </div>
-    )
+return (
+    <>
+        <Nav />
+        <Box className="container" w='60%' ml='auto' mr='auto' mt='0' mb='0' p='2'>
+            <Heading as='h1' size='3xl' className="title" textAlign='center' mt='10' mb='10'>
+                My Feed
+            </Heading>
+
+            <Box w='lg' className="video-container" ml='auto' mr='auto'>
+                <Player
+                    component={MyComposition}
+                    inputProps={{ subtitles: subtitles }}
+                    durationInFrames={1200}
+                    compositionWidth={515}
+                    compositionHeight={720}
+                    fps={30}
+                    controls
+                    renderLoading={RenderLoading}
+                    renderPoster={RenderPoster}
+                    showPosterWhenUnplayed
+                    showPosterWhenPaused
+                    showPosterWhenEnded
+                    />
+            
+                <Button 
+                    w='lg'
+                    mt='10'
+                    ml='auto'
+                    mr='auto'
+                    colorScheme="teal"
+                    
+                    onClick={() => {
+                        window.open('/api/render', '_blank');
+                    }}
+                >Render Video</Button>
+            </Box>
+
+        </Box>
+    </>
+)
 }
 
 export default Home;
