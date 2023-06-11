@@ -1,0 +1,24 @@
+{
+  "name": "tiktokgpt",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "video": "remotion preview src/remotion/index.js"
+  },
+  "dependencies": {
+    "@chakra-ui/react": "^1.8.9",
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
+    "@remotion/cli": "^3.3.100",
+    "@remotion/google-fonts": "^3.3.100",
+    "framer-motion": "^6.5.1",
+    "next": "13.4.4",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "remotion": "^3.3.100"
+  }
+}
