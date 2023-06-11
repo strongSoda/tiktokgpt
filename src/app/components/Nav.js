@@ -18,41 +18,35 @@ import {
   Heading
 } from '@chakra-ui/react';
 import { MoonIcon, SunIcon } from '@chakra-ui/icons';
-
-const NavLink = ({ children }) => (
-  <Link
-    px={2}
-    py={1}
-    rounded={'md'}
-    _hover={{
-      textDecoration: 'none',
-      bg: useColorModeValue('gray.200', 'gray.700'),
-    }}
-    href={'#'}>
-    {children}
-  </Link>
-);
+import Logo from './Logo';
 
 export default function Nav() {
   const { colorMode, toggleColorMode } = useColorMode();
   const { isOpen, onOpen, onClose } = useDisclosure();
   return (
     <>
-      <Box bg={useColorModeValue('gray.100', 'gray.900')} px={4}>
+      <Box bg={useColorModeValue('gray.100', 'gray.900')} px={4} 
+        width={{
+          base: '200%',
+          md: '180%',
+          xl: '100%',
+        }}
+        height={{
+          base: '15vh',
+          md: '10vh',
+          xl: '100%',
+        }}
+        py={[6, 4, 4, 4]}
+    >
         <Flex h={16} alignItems={'center'} justifyContent={'space-between'}>
           
-          <Link href='/' style={{ textDecoration: 'none' }}>
-          <Stack direction='row' spacing={1} align='center'>
-            <Image w='50px' src="https://i.pinimg.com/originals/65/f2/70/65f270d7d57999a5f48b8855d4a181b4.png" alt="logo" />
-            <Heading as='h3' size='lg' ml={2} display='inline' fontFamily={'Titan One'}>
-              GPT
-            </Heading>
-          </Stack>
-          </Link>
+        <Logo />
 
           <Flex alignItems={'center'}>
             <Stack direction={'row'} spacing={7}>
-              <Button onClick={toggleColorMode}>
+              <Button 
+                fontSize={['3em', '20em', '4em', 'xl']}
+                onClick={toggleColorMode}>
                 {colorMode === 'light' ? <MoonIcon /> : <SunIcon />}
               </Button>
 
