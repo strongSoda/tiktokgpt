@@ -23,8 +23,8 @@ const start = async () => {
   const compositionId = "Video";
 
   // You only have to do this once, you can reuse the bundle.
-  const entry = "./src/remotion/index.js";
   console.log("Creating a Webpack bundle of the video");
+  const entry = "./src/remotion/index.js";
   const bundleLocation = await bundle(path.resolve(entry), () => undefined, {
     // If you have a Webpack override, make sure to add it here
     webpackOverride: (config) => config,
