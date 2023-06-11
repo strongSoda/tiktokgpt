@@ -13,12 +13,14 @@ const Home = () => {
 return (
     <>
         <Nav />
+        
         <Box className="container" w={['200vw', '100vw', '100%', '100%']}
          ml='auto' mr='auto' mt='0' mb='10' p='2'>
             <Heading as='h1' size='3xl' className="title" textAlign='center' mt='10' mb='10'>
                 My Feed
             </Heading>
 
+            {/* Remotion Player */}
             <Stack direction="row" spacing={2} align="center" width="lg" ml='auto' mr='auto'>
                 <Box className="video-container">
                     <Player
@@ -49,6 +51,7 @@ return (
                     >Render Video</Button>
                 </Box>
 
+                {/* action buttons */}
                 <Stack direction="column" spacing={8} align="center">
                     
                     <Stack direction="column" spacing={1} align="center">
