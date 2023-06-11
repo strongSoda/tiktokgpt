@@ -10,9 +10,12 @@
     "video": "remotion preview src/remotion/index.js"
   },
   "dependencies": {
+    "@chakra-ui/icons": "^2.0.19",
     "@chakra-ui/react": "^1.8.9",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
+    "@fontsource/open-sans": "^5.0.3",
+    "@fontsource/raleway": "^5.0.3",
     "@remotion/cli": "^3.3.100",
     "@remotion/google-fonts": "^3.3.100",
     "framer-motion": "^6.5.1",
