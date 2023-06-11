@@ -1,34 +1,38 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# TikTokGPT
 
-## Getting Started
+This repo contains a sample app for making a video with remotion and rendering it.
 
-First, run the development server:
+## How to run
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-```
+- Clone the repo `git clone https://github.com/strongSoda/tiktokgpt.git`
+- Run `yarn` to install dependencies
+- Run `yarn dev` to start the dev server
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## How to use
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+- Go to `localhost:3000`
+- See the video
+- Click on the `Render Video` button or go to `localhost:3000/api/render` to render the video
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+## How to run `remotion` server
 
-## Learn More
+- Run `yarn video` to start the remotion server
 
-To learn more about Next.js, take a look at the following resources:
+## Core Files
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `remotion/` contains the video Composition files 
+    - [src/remotion/Composition.js](src/remotion/Composition.js)
+    - [src/remotion/Root.js](src/remotion/Root.js)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+- Home page is at [src/pages/index.js](src/pages/index.js)
+- Render API is at [src/pages/api/render.js](src/pages/api/render.js)
+- The rendered video is placed at [out/video.mp4](out/video.mp4)
+- Video subtitles data is at [src/data/subtitles.js](src/data/subtitles.js)
 
-## Deploy on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Tech Used
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+- Remotion
+- Nextjs
+- Chakra UI
+
