@@ -36,3 +36,10 @@ This repo contains a sample app for making a video with remotion and rendering i
 - Nextjs
 - Chakra UI
 
+## Demo
+
+https://tiktokgpt.vercel.app/
+
+> Note: for rendering video in next api route, run locally with instructions above
+
+
