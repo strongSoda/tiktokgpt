@@ -13,6 +13,8 @@ This repo contains a sample app for making a video with remotion and rendering i
 - Go to `localhost:3000`
 - See the video
 - Click on the `Render Video` button or go to `localhost:3000/api/render` to render the video
+- Check logs in terminal for rendering status
+- The rendered video is placed at `out/video.mp4`
 
 ## How to run `remotion` server
 
