@@ -83,3 +83,9 @@ const getPrompt = (topic) => {
   
   `;
 }
+
+export const config = {
+  runtime: 'edge', // this is a pre-requisite
+  regions: ['bom1'], // only execute this function on iad1
+};
+
