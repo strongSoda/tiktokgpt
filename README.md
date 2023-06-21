@@ -10,7 +10,7 @@ This repo contains a sample app for making a video with remotion and rendering i
 
 ## How to use
 
-- Go to `localhost:3000`
+- Go to `localhost:3000` or `localhost:3000/generate` 
 - See the video
 - Click on the `Render Video` button or go to `localhost:3000/api/render` to render the video
 - Check logs in terminal for rendering status
