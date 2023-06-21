@@ -42,7 +42,7 @@ const getSentences = async (topic) => {
 
 const getPrompt = (topic) => {
   // return a prompt for write a script for a video based on the video topic with OpenAI's API for a 30 seconds video with 10 sentences. Return a valid JSON array of objects with the sentences in order with the following properties: id, start, duration, text, imageDescription where imageDescription is the description of the image appropriate for the sentence from Unsplash's API in max 4 words.
-  return `Write a script for a 30 seconds video with 10 sentences on the topic "${topic}". Return a valid JSON array of objects with the sentences in order with the following properties: id, start, durationInFrames, text, imageDescription.Where imageDescription is the description of the image appropriate for the sentence in max 4 words.
+  return `Write a script for a 30 seconds video with 10 sentences on the topic "${topic}". Return a valid JSON array of objects with the sentences in order with the following properties: id, start, durationInFrames (with 60 fps, minimum=10 seconds ), text, imageDescription. Where imageDescription is the description of the image appropriate for the sentence in max 4 words. 
   -------
 
   Example Output:
