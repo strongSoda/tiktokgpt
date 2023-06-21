@@ -10,7 +10,7 @@
     "video": "remotion preview src/remotion/index.js"
   },
   "engines": {
-    "node": "18.16.0"
+    "node": "18.x"
   },
   "dependencies": {
     "@chakra-ui/icons": "^2.0.19",
