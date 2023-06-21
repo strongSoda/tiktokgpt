@@ -3,55 +3,56 @@ import { useEffect, useState } from "react";
 import { interpolate, Sequence, spring, staticFile, useCurrentFrame, useVideoConfig, Video } from "remotion";
 import { loadFont } from "@remotion/google-fonts/TitanOne";
 const { fontFamily } = loadFont();
+import { useTts } from 'tts-react'
 
 import { Player } from "@remotion/player";
-import dummySubtitles from "@/app/data/sentences";
-import {Subtitle} from "@/remotion/Composition";
+// import dummySubtitles from "@/app/data/sentences";
+// import {Subtitle} from "@/remotion/Composition";
 
 const getDuration = (subtitles) => {
-  const sortedSubtitles = subtitles.sort((a, b) => a.start - b.start);
+  const sortedSubtitles = subtitles.sort((a, b) => a?.start - b?.start);
   console.log('sortedSubtitles', sortedSubtitles);
-  const longestSubtitle = sortedSubtitles[sortedSubtitles.length - 1];
-  console.log('duration', longestSubtitle, longestSubtitle.start + longestSubtitle.durationInFrames)
-  return longestSubtitle.start + longestSubtitle.durationInFrames;
+  const longestSubtitle = sortedSubtitles[sortedSubtitles?.length - 1];
+  console.log('duration', longestSubtitle, longestSubtitle?.start + longestSubtitle?.durationInFrames)
+  return longestSubtitle?.start + longestSubtitle?.durationInFrames;
 }
-const dummySentences = [
-    {
-        "id": 1,
-        "start": 0,
-        "durationInFrames": 90,
-        "text": "The shortest war lasted 38 minutes",
-        "imageDescription": "Clock"
-    },
-    {
-        "id": 2,
-        "start": 90,
-        "durationInFrames": 90,
-        "text": "The world’s largest snowflake was 15 inches wide",
-        "imageDescription": "Snowflake"
-    },
-    {
-        "id": 3,
-        "start": 180,
-        "durationInFrames": 90,
-        "text": "A cockroach can live for several weeks without its head",
-        "imageDescription": "Cockroach"
-    },
-    {
-        "id": 4,
-        "start": 270,
-        "durationInFrames": 90,
-        "text": "The longest wedding veil was longer than 63 football fields",
-        "imageDescription": "Wedding veil"
-    },
-    {
-        "id": 5,
-        "start": 360,
-        "durationInFrames": 90,
-        "text": "The first oranges weren't actually orange",
-        "imageDescription": "Orange"
-    }
-]
+// const dummySentences = [
+//     {
+//         "id": 1,
+//         "start": 0,
+//         "durationInFrames": 90,
+//         "text": "The shortest war lasted 38 minutes",
+//         "imageDescription": "Clock"
+//     },
+//     {
+//         "id": 2,
+//         "start": 90,
+//         "durationInFrames": 90,
+//         "text": "The world’s largest snowflake was 15 inches wide",
+//         "imageDescription": "Snowflake"
+//     },
+//     {
+//         "id": 3,
+//         "start": 180,
+//         "durationInFrames": 90,
+//         "text": "A cockroach can live for several weeks without its head",
+//         "imageDescription": "Cockroach"
+//     },
+//     {
+//         "id": 4,
+//         "start": 270,
+//         "durationInFrames": 90,
+//         "text": "The longest wedding veil was longer than 63 football fields",
+//         "imageDescription": "Wedding veil"
+//     },
+//     {
+//         "id": 5,
+//         "start": 360,
+//         "durationInFrames": 90,
+//         "text": "The first oranges weren't actually orange",
+//         "imageDescription": "Orange"
+//     }
+// ]
 
 const GenerateVideo = () => {
   // video topic state
@@ -59,16 +60,19 @@ const GenerateVideo = () => {
   const [sentences, setSentences] = useState([]);
   const [showPlayer, setShowPlayer] = useState(false);
   const [subtitles, setSubtitles] = useState([]);
+  const [totalDurationInFrames, setTotalDurationInFrames] = useState(0);
 
   const generateScript = async () => {
     console.log('Generating script...');
     const res = await fetch(`/api/getSentences?topic=${videoTopic}`);
     const data = await res.json();
 
-    console.log('generated script', JSON.parse(data?.sentences));
-    setSentences(JSON.parse(data?.sentences));
+    const result = JSON.parse(data?.sentences)
+    console.log('generated script', result);
+    setSentences(result?.sentences);
+    setTotalDurationInFrames(result?.totalDurationInFrames);
 
-    await generateImages(JSON.parse(data?.sentences));
+    await generateImages(result?.sentences);
   }
 
   const generateImages = async (SENTENCES) => {
@@ -96,6 +100,8 @@ const GenerateVideo = () => {
 
         
       })
+
+      
 
       console.log('newSentences', newSentences);
 
@@ -166,7 +172,7 @@ const GenerateVideo = () => {
                 <Player
                   component={GenerateSequence}
                   inputProps={{ sentences: subtitles }}
-                  durationInFrames={getDuration(subtitles)}
+                  durationInFrames={totalDurationInFrames}
                   fps={60}
                   controls
                   compositionWidth={1100}
@@ -200,12 +206,6 @@ const GenerateVideo = () => {
 const GenerateSequence = ({sentences}) => {
   const sortedSentences = sentences?.sort((a, b) => a?.start - b?.start);
 
-  const frame = useCurrentFrame();
-  const fps = useVideoConfig()?.fps;
-
-  const opacity = interpolate(frame, [0, 30], [0, 1])
-  const translate = spring({ frame, fps, from: 0, to: 100 })
-
   useEffect(() => {
     console.log('Here', sentences);
   }, [sentences]);
@@ -224,7 +224,7 @@ const GenerateSequence = ({sentences}) => {
           </Box>
         </Sequence>
         <Sequence from={sentence?.start} duration={sentence?.video?.durationInFrames + 700}>
-          <Heading style={{
+          {/* <Heading style={{
                 position: 'absolute',
                 width: '100%',
                 textAlign: 'center',
@@ -234,7 +234,11 @@ const GenerateSequence = ({sentences}) => {
                 fontFamily: fontFamily,
                 fontSize: '2rem',
                 transform: `translateY(-${translate}px)`
-          }}>{sentence?.text}</Heading>
+          }}>{sentence?.text}</Heading> */}
+
+          <CustomTTSComponent highlight>
+            {sentence?.text}
+          </CustomTTSComponent>
         </Sequence>
         </Box>
       )
@@ -243,6 +247,37 @@ const GenerateSequence = ({sentences}) => {
     </>
   )
   }
+
+const CustomTTSComponent = ({ children, highlight = false }) => {
+  const { ttsChildren, state, play, stop, pause } = useTts({
+    children,
+    markTextAsSpoken: highlight
+  })
+
+  const frame = useCurrentFrame();
+  const fps = useVideoConfig()?.fps;
+
+  const opacity = interpolate(frame, [0, 30], [0, 1])
+  const translate = spring({ frame, fps, from: 0, to: 100 })
+
+
+
+  return (
+    <Heading style={{
+                position: 'absolute',
+                width: '100%',
+                textAlign: 'center',
+                opacity,
+                top: '50%',
+                color: 'yellow',
+                fontFamily: fontFamily,
+                fontSize: '2rem',
+                transform: `translateY(-${translate}px)`
+          }}>
+      {ttsChildren}
+    </Heading>
+  )
+}
 
 export default GenerateVideo;
 

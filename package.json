@@ -25,6 +25,7 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-icons": "^4.9.0",
-    "remotion": "^3.3.100"
+    "remotion": "^3.3.100",
+    "tts-react": "^3.0.0"
   }
 }
