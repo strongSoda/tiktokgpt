@@ -1,11 +1,12 @@
-import { Box, Button, Heading, Textarea } from "@chakra-ui/react";
+import { Box, Button, Heading, Stack, Textarea } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
-import { Audio, Img, interpolate, Sequence, spring, staticFile, useCurrentFrame, useVideoConfig, Video } from "remotion";
+import { AbsoluteFill, Audio, Img, interpolate, Sequence, spring, staticFile, useCurrentFrame, useVideoConfig, Video } from "remotion";
 import { loadFont } from "@remotion/google-fonts/TitanOne";
 const { fontFamily } = loadFont();
 import { useTts } from 'tts-react'
 
 import { Player } from "@remotion/player";
+import { RenderLoading, RenderPoster } from "@/app/components/RenderAssets";
 // import dummySubtitles from "@/app/data/sentences";
 // import {Subtitle} from "@/remotion/Composition";
 
@@ -59,8 +60,14 @@ const GenerateVideo = () => {
   const [videoTopic, setVideoTopic] = useState("cool travel destinations");
   const [sentences, setSentences] = useState([]);
   const [showPlayer, setShowPlayer] = useState(false);
+  const [showImagePlayer, setShowImagePlayer] = useState(false);
   const [subtitles, setSubtitles] = useState([]);
   const [totalDurationInFrames, setTotalDurationInFrames] = useState(0);
+
+  const [videoType, setVideoType] = useState('');
+
+  const [loadingImage, setLoadingImage] = useState(false);
+  const [loadingVideo, setLoadingVideo] = useState(false);
 
   const generateScript = async () => {
     console.log('Generating script...');
@@ -72,7 +79,52 @@ const GenerateVideo = () => {
     setSentences(result?.sentences);
     setTotalDurationInFrames(result?.totalDurationInFrames);
 
-    await generateImages(result?.sentences);
+    if(videoType === 'video') {
+      await generateVideos(result?.sentences);
+    }
+    else if(videoType === 'image') {
+      await generateImages(result?.sentences);
+    }
+  }
+
+  const generateVideos = async (SENTENCES) => {
+    console.log('Generating images...', SENTENCES);
+
+    try {
+      // call Pexels API for each sentence 
+      let newSentences = []
+      SENTENCES?.map(async (sentence) => {
+        const res = await fetch(`https://api.pexels.com/videos/search?query=${sentence?.imageDescription}&per_page=1&orientation=landscape&size=medium`, {
+          headers: {
+            Authorization: process.env.NEXT_PUBLIC_PEXELS_API_KEY
+          }
+        });
+        const data = await res.json();
+        console.log(data?.videos[0]);
+
+        newSentences.push({
+              ...sentence,
+              video: data?.videos[0]
+            }
+        );
+
+        
+      })
+
+      console.log('newSentences', newSentences);
+
+      const sortedSentences = newSentences.sort((a, b) => a.start - b.start);
+
+      console.log('sortedSentences', sortedSentences);
+      setSubtitles(sortedSentences);
+      setShowImagePlayer(false);
+      setLoadingVideo(false)
+      setShowPlayer(true);
+  
+    }
+    catch (e) {
+      console.error(e);
+    }
   }
 
   const generateImages = async (SENTENCES) => {
@@ -80,28 +132,9 @@ const GenerateVideo = () => {
 
     try {
       // call Pexels API for each sentence 
-      const newSentences = []
-      // SENTENCES?.map(async (sentence) => {
-      //   const res = await fetch(`https://api.pexels.com/videos/search?query=${sentence?.imageDescription}&per_page=1&orientation=landscape&size=medium`, {
-      //     headers: {
-      //       Authorization: process.env.NEXT_PUBLIC_PEXELS_API_KEY
-      //     }
-      //   });
-      //   const data = await res.json();
-      //   console.log(data?.videos[0]);
+      let newSentences = []
 
-      //   // update setSentences with the video in the sentence object which matches the sentence id of the current sentence
-      //   // setSentences((prev) => [...prev, { ...sentence, video: data?.videos[0] }]);
-      //   newSentences.push({
-      //         ...sentence,
-      //         video: data?.videos[0]
-      //       }
-      //   );
-
-        
-      // })
-
-      SENTENCES?.map(async (sentence) => {
+      SENTENCES.map(async (sentence) => {
         const res = await fetch(`https://api.pexels.com/v1/search?query=${sentence?.imageDescription}&per_page=1&orientation=landscape&size=medium`, {
           headers: {
             Authorization: process.env.NEXT_PUBLIC_PEXELS_API_KEY
@@ -110,16 +143,12 @@ const GenerateVideo = () => {
         const data = await res.json();
         console.log(data?.photos[0]);
 
-        // update setSentences with the video in the sentence object which matches the sentence id of the current sentence
-        // setSentences((prev) => [...prev, { ...sentence, video: data?.videos[0] }]);
         newSentences.push({
               ...sentence,
               // video: data?.videos[0]
               photo: data?.photos[0]
             }
         );
-
-        
       })
 
 
@@ -129,15 +158,12 @@ const GenerateVideo = () => {
       const sortedSentences = newSentences.sort((a, b) => a.start - b.start);
 
       console.log('sortedSentences', sortedSentences);
+      
       setSubtitles(sortedSentences);
-      setShowPlayer(true);
+      setShowPlayer(false);
+      setLoadingImage(false)
+      setShowImagePlayer(true);
 
-      // setTimeout(() => {
-      //   console.log('Debug Sentences with Videos', sentences);
-      //   console.log('showing player...');
-      //   setShowPlayer(true);
-      // }
-      // , 2000);
     }
     catch (e) {
       console.error(e);
@@ -150,7 +176,7 @@ const GenerateVideo = () => {
     // 1. Write a script to generate a video based on the video topic with OpenAI's API for a 30 seconds video with 10 sentences. Return a JSON object with the sentences in order with the following properties: id, start, duration, text.
     // 2. For each sentence, find an appropriate image from Unsplash's API. Return a JSON object with the sentences in order with the following properties: id, start, duration, text, image.
     // 3. Map the JSON object and return a Sequence for each sentence with the Subtitle component and the Image component.
-  
+    
     await generateScript();
     // await generateImages();
     
@@ -169,11 +195,26 @@ const GenerateVideo = () => {
     // }
   }, [subtitles]);
 
+  useEffect(() => {
+    if(videoType==='video') {
+      setLoadingImage(false);
+      setLoadingVideo(true);
+      generateVideo();
+    } else if(videoType==='image') {
+      setLoadingVideo(false);
+      setLoadingImage(true);
+      generateVideo();
+    }
+  }, [videoType]);
+
+
 
     return (
         <div>
-            <Heading>Generate Video</Heading>
+            <Heading textAlign={'center'} as="h1" size="2xl" mb="10" mt="10"
+            >Generate Video</Heading>
 
+            <Stack spacing={3} w="lg" ml="auto" mr="auto">
             {/* text input for Video Topic with Chakra UI */}
             <Textarea placeholder="Video Topic" size="lg" onChange={(e) => setVideoTopic(e?.target?.value)} value={videoTopic} />
 
@@ -184,15 +225,49 @@ const GenerateVideo = () => {
                 ml='auto'
                 mr='auto'
                 colorScheme="teal"
-                onClick={generateVideo}
-            >Generate Video</Button>
+                onClick={() => {
+                  setVideoType('image');
+                }}
+            >{loadingImage ? 'Generating with Images...' : 'Generate with Images'}</Button>
+            <Button
+                w='lg'
+                mt='10'
+                ml='auto'
+                mr='auto'
+                colorScheme="teal"
+                onClick={() => {
+                  setVideoType('video');
+                }}
+            >{loadingVideo ? 'Generating with Videos...' : 'Generate with Videos'}</Button>
+            </Stack>
 
+            <Box className="video-container" w="80%" mr="auto" ml="auto" mt="10"
+            style={{position: 'relative'}}>
             {
-              showPlayer && (
+              showPlayer ? (
                 <Box className="video-container" w="lg" style={{position: 'relative'}}>
                 <Player
                   component={GenerateSequence}
-                  inputProps={{ sentences: subtitles, totalDurationInFrames }}
+                  inputProps={{ sentences: subtitles, totalDurationInFrames, type: 'video' }}
+                  durationInFrames={totalDurationInFrames}
+                  fps={60}
+                  controls
+                  compositionWidth={1100}
+                  compositionHeight={620}
+
+                />
+                </Box>
+              )
+              :
+              ''
+            }
+
+            {
+              showImagePlayer ? (
+                <Box className="video-container" w="lg" style={{position: 'relative'}}>
+                <Player
+                  component={GenerateSequence}
+                  inputProps={{ sentences: subtitles, totalDurationInFrames, type: 'photo' }}
                   durationInFrames={totalDurationInFrames}
                   fps={60}
                   controls
@@ -200,9 +275,13 @@ const GenerateVideo = () => {
                   compositionHeight={720}
 
                 />
-                </Box>
+              </Box>
               )
+              :
+              ''
             }
+
+            </Box>
 
             {/* {dummySubtitles?.length ?
               <Box className="video-container" style={{position: 'relative', height: '100vh', width: '100vw'}}>
@@ -224,8 +303,9 @@ const GenerateVideo = () => {
     );
 }
 
-const GenerateSequence = ({sentences, totalDurationInFrames}) => {
+const GenerateSequence = ({sentences, totalDurationInFrames, type}) => {
   const sortedSentences = sentences?.sort((a, b) => a?.start - b?.start);
+  const frame = useCurrentFrame();
 
   useEffect(() => {
     console.log('Here', sentences);
@@ -237,33 +317,36 @@ const GenerateSequence = ({sentences, totalDurationInFrames}) => {
       sortedSentences?.length && sortedSentences?.map((sentence) => {
       return (
         <Box key={sentence?.id}>
-        <Sequence from={sentence?.start} duration={sentence?.photo?.durationInFrames}>
-          <Box className="video" ml='auto' mr='auto' mt='0' mb='0'>
-            {/* <Video src={sentence?.video?.video_files[3]?.link} 
-            style={{ width: '100%', height: '100%' }} 
-            /> */}
-            <Img src={sentence?.photo?.src?.landscape} />
+        <Sequence from={sentence?.start} duration={type === 'video' ? sentence?.video?.durationInFrames : sentence?.photo?.durationInFrames}>
+          <Box className="video" mt='0' mb='0'>
+            {
+              type === 'video' ? (
+                <Video src={sentence?.video?.video_files[0]?.link} 
+                style={{ width: '100%', height: '100%' }} 
+                />
+              ) : (
+                <Img src={sentence?.photo?.src?.landscape} 
+                  style={{ width: '100%', height: '100%' }}
+                />
+              )
+            }
           </Box>
         </Sequence>
-        <Sequence from={sentence?.start + 20} duration={sentence?.photo?.durationInFrames - 40}>
-          {/* <Heading style={{
-                position: 'absolute',
-                width: '100%',
-                textAlign: 'center',
-                opacity,
-                top: '50%',
-                color: 'yellow',
-                fontFamily: fontFamily,
-                fontSize: '2rem',
-                transform: `translateY(-${translate}px)`
-          }}>{sentence?.text}</Heading> */}
-
-          <CustomTTSComponent highlight>
+        <Sequence from={sentence?.start + 20} duration={type === 'video' ? sentence?.video?.durationInFrames - 40 : sentence?.photo?.durationInFrames - 40}>
+          <CustomTTSComponent highlight durationInFrames={type === 'video' ? sentence?.video?.durationInFrames - 40 : sentence?.photo?.durationInFrames - 40}>
             {sentence?.text}
           </CustomTTSComponent>
         </Sequence>
         <Sequence from={0} duration={totalDurationInFrames}>
-          <Audio src={"https://dl.espressif.com/dl/audio/ff-16b-2c-44100hz.aac"} />
+          <AbsoluteFill>
+            <Audio src={"https://dl.espressif.com/dl/audio/ff-16b-2c-44100hz.mp3"} 
+            volume={(f) =>
+              interpolate(f, [0, 30], [0, 1], { extrapolateLeft: "clamp" })
+            }
+            muted={frame >= totalDurationInFrames - 60 }
+            // loop
+            />
+          </AbsoluteFill>
         </Sequence>
         </Box>
       )
@@ -273,7 +356,7 @@ const GenerateSequence = ({sentences, totalDurationInFrames}) => {
   )
   }
 
-const CustomTTSComponent = ({ children, highlight = false }) => {
+const CustomTTSComponent = ({ children, durationInFrames, highlight = false }) => {
   const { ttsChildren, state, play, stop, pause } = useTts({
     children,
     markTextAsSpoken: highlight
@@ -284,17 +367,6 @@ const CustomTTSComponent = ({ children, highlight = false }) => {
 
   const opacity = interpolate(frame, [0, 30], [0, 1])
   const translate = spring({ frame, fps, from: 0, to: 100 })
-
-  useEffect(() => {
-    console.log('state', state);
-    // if (state === 'playing') {
-      // play()
-    // } else if (state === 'stopped') {
-    //   stop()
-    // } else if (state === 'paused') {
-    //   pause()
-    // }
-  }, [state, play, stop, pause])
 
   return (
     <Heading style={{

@@ -1,7 +1,7 @@
 import { Image } from '@chakra-ui/react'
 import { AbsoluteFill } from "remotion";
 
-export const RenderLoading = ({ height, width }) => {
+export const RenderLoading = ({ height, width, }) => {
 return (
     <AbsoluteFill style={{ backgroundColor: "gray" }}>
         {/* loading SVG animation */}
@@ -10,10 +10,10 @@ return (
 );
 }
 
-export const RenderPoster = ({ height, width }) => {
+export const RenderPoster = ({ height, width, url="https://i.imgur.com/d8WjPeI.png" }) => {
 return (
     <AbsoluteFill style={{ backgroundColor: "gray" }}>
-        <Image src="https://i.imgur.com/d8WjPeI.png" alt="loading" />
+        <Image src={url} alt="loading" />
     </AbsoluteFill>
 );
 }
