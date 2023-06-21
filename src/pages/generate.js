@@ -1,6 +1,6 @@
 import { Box, Button, Heading, Textarea } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
-import { interpolate, Sequence, spring, staticFile, useCurrentFrame, useVideoConfig, Video } from "remotion";
+import { Audio, Img, interpolate, Sequence, spring, staticFile, useCurrentFrame, useVideoConfig, Video } from "remotion";
 import { loadFont } from "@remotion/google-fonts/TitanOne";
 const { fontFamily } = loadFont();
 import { useTts } from 'tts-react'
@@ -56,7 +56,7 @@ const getDuration = (subtitles) => {
 
 const GenerateVideo = () => {
   // video topic state
-  const [videoTopic, setVideoTopic] = useState("5 travel destinations");
+  const [videoTopic, setVideoTopic] = useState("cool travel destinations");
   const [sentences, setSentences] = useState([]);
   const [showPlayer, setShowPlayer] = useState(false);
   const [subtitles, setSubtitles] = useState([]);
@@ -81,27 +81,48 @@ const GenerateVideo = () => {
     try {
       // call Pexels API for each sentence 
       const newSentences = []
+      // SENTENCES?.map(async (sentence) => {
+      //   const res = await fetch(`https://api.pexels.com/videos/search?query=${sentence?.imageDescription}&per_page=1&orientation=landscape&size=medium`, {
+      //     headers: {
+      //       Authorization: process.env.NEXT_PUBLIC_PEXELS_API_KEY
+      //     }
+      //   });
+      //   const data = await res.json();
+      //   console.log(data?.videos[0]);
+
+      //   // update setSentences with the video in the sentence object which matches the sentence id of the current sentence
+      //   // setSentences((prev) => [...prev, { ...sentence, video: data?.videos[0] }]);
+      //   newSentences.push({
+      //         ...sentence,
+      //         video: data?.videos[0]
+      //       }
+      //   );
+
+        
+      // })
+
       SENTENCES?.map(async (sentence) => {
-        const res = await fetch(`https://api.pexels.com/videos/search?query=${sentence?.imageDescription}&per_page=1&orientation=landscape&size=medium`, {
+        const res = await fetch(`https://api.pexels.com/v1/search?query=${sentence?.imageDescription}&per_page=1&orientation=landscape&size=medium`, {
           headers: {
             Authorization: process.env.NEXT_PUBLIC_PEXELS_API_KEY
           }
         });
         const data = await res.json();
-        console.log(data?.videos[0]);
+        console.log(data?.photos[0]);
 
         // update setSentences with the video in the sentence object which matches the sentence id of the current sentence
         // setSentences((prev) => [...prev, { ...sentence, video: data?.videos[0] }]);
         newSentences.push({
               ...sentence,
-              video: data?.videos[0]
+              // video: data?.videos[0]
+              photo: data?.photos[0]
             }
         );
 
         
       })
 
-      
+
 
       console.log('newSentences', newSentences);
 
@@ -171,7 +192,7 @@ const GenerateVideo = () => {
                 <Box className="video-container" w="lg" style={{position: 'relative'}}>
                 <Player
                   component={GenerateSequence}
-                  inputProps={{ sentences: subtitles }}
+                  inputProps={{ sentences: subtitles, totalDurationInFrames }}
                   durationInFrames={totalDurationInFrames}
                   fps={60}
                   controls
@@ -203,7 +224,7 @@ const GenerateVideo = () => {
     );
 }
 
-const GenerateSequence = ({sentences}) => {
+const GenerateSequence = ({sentences, totalDurationInFrames}) => {
   const sortedSentences = sentences?.sort((a, b) => a?.start - b?.start);
 
   useEffect(() => {
@@ -216,14 +237,15 @@ const GenerateSequence = ({sentences}) => {
       sortedSentences?.length && sortedSentences?.map((sentence) => {
       return (
         <Box key={sentence?.id}>
-        <Sequence from={sentence?.start} duration={sentence?.video?.durationInFrames + 700}>
-          <Box className="video" ml='auto' mr='auto' mt='0' mb='0' bg='black' borderWidth='1px' borderRadius='lg'>
-            <Video src={sentence?.video?.video_files[3]?.link} 
+        <Sequence from={sentence?.start} duration={sentence?.photo?.durationInFrames}>
+          <Box className="video" ml='auto' mr='auto' mt='0' mb='0'>
+            {/* <Video src={sentence?.video?.video_files[3]?.link} 
             style={{ width: '100%', height: '100%' }} 
-            />
+            /> */}
+            <Img src={sentence?.photo?.src?.landscape} />
           </Box>
         </Sequence>
-        <Sequence from={sentence?.start} duration={sentence?.video?.durationInFrames + 700}>
+        <Sequence from={sentence?.start + 20} duration={sentence?.photo?.durationInFrames - 40}>
           {/* <Heading style={{
                 position: 'absolute',
                 width: '100%',
@@ -239,6 +261,9 @@ const GenerateSequence = ({sentences}) => {
           <CustomTTSComponent highlight>
             {sentence?.text}
           </CustomTTSComponent>
+        </Sequence>
+        <Sequence from={0} duration={totalDurationInFrames}>
+          <Audio src={"https://dl.espressif.com/dl/audio/ff-16b-2c-44100hz.aac"} />
         </Sequence>
         </Box>
       )
@@ -260,7 +285,16 @@ const CustomTTSComponent = ({ children, highlight = false }) => {
   const opacity = interpolate(frame, [0, 30], [0, 1])
   const translate = spring({ frame, fps, from: 0, to: 100 })
 
-
+  useEffect(() => {
+    console.log('state', state);
+    // if (state === 'playing') {
+      // play()
+    // } else if (state === 'stopped') {
+    //   stop()
+    // } else if (state === 'paused') {
+    //   pause()
+    // }
+  }, [state, play, stop, pause])
 
   return (
     <Heading style={{
