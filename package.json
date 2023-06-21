@@ -9,6 +9,9 @@
     "lint": "next lint",
     "video": "remotion preview src/remotion/index.js"
   },
+  "engines": {
+    "node": "18.16.0"
+  },
   "dependencies": {
     "@chakra-ui/icons": "^2.0.19",
     "@chakra-ui/react": "^1.8.9",
