@@ -59,7 +59,7 @@ const Poc = () => {
     if (!script) return
     
     setgeneratingVoiceover(true)
-    const res = await fetch('http://127.0.0.1:5000/generate-voiceover-s3?text=' + script)
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API}/generate-voiceover-s3?text=` + script)
 
     const data = await res?.json()
 
@@ -71,7 +71,7 @@ const Poc = () => {
   }
 
   const getTalk = async (id) => {
-    const res = await fetch("http://127.0.0.1:5000/get-talking-video/" + id)
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API}/get-talking-video/` + id)
 
     const data = await res?.json()
 
@@ -94,7 +94,7 @@ const Poc = () => {
     if (!script) return
     
     setgeneratingVideo(true)
-    const res = await fetch('http://127.0.0.1:5000/generate-talking-video?text=' + script)
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API}/generate-talking-video?text=` + script)
 
     const data = await res?.json()
 
