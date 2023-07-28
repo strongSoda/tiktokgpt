@@ -19,9 +19,11 @@
     "@emotion/styled": "^11.11.0",
     "@fontsource/open-sans": "^5.0.3",
     "@fontsource/raleway": "^5.0.3",
+    "@madzadev/audio-player": "^1.1.11",
     "@remotion/cli": "3.3.100",
     "@remotion/google-fonts": "^3.3.100",
     "@remotion/lambda": "3.3.100",
+    "file-loader": "^6.2.0",
     "framer-motion": "^6.5.1",
     "next": "13.4.4",
     "openai": "^3.3.0",
@@ -30,6 +32,7 @@
     "react-dom": "18.2.0",
     "react-icons": "^4.9.0",
     "remotion": "3.3.100",
-    "tts-react": "^3.0.0"
+    "tts-react": "^3.0.0",
+    "url-loader": "^4.1.1"
   }
 }

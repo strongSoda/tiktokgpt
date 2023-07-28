@@ -69,6 +69,8 @@ const GenerateVideo = () => {
   const [loadingImage, setLoadingImage] = useState(false);
   const [loadingVideo, setLoadingVideo] = useState(false);
 
+  const [titleAudioUrl, setTitleAudioUrl] = useState('');
+
   const generateScript = async () => {
     console.log('Generating script...');
     const res = await fetch(`/api/getSentences?topic=${videoTopic}`);
@@ -79,21 +81,31 @@ const GenerateVideo = () => {
     setSentences(result?.sentences);
     setTotalDurationInFrames(result?.totalDurationInFrames);
 
+    const audioUrl = await generateTitleVoiceOver(result?.sentences[0]?.text);
     if(videoType === 'video') {
-      await generateVideos(result?.sentences);
+      await generateVideos(result?.sentences, audioUrl);
     }
     else if(videoType === 'image') {
-      await generateImages(result?.sentences);
+      await generateImages(result?.sentences, audioUrl);
     }
   }
 
-  const generateVideos = async (SENTENCES) => {
-    console.log('Generating images...', SENTENCES);
+  const generateTitleVoiceOver = async (title) => {
+    console.log('Generating title voice over...', title);
+    const res = await fetch(`http://127.0.0.1:5000/generate-voiceover-s3?text=${title}`);
+    const data = await res.json();
+    console.log('generated title voice over', data);
+    setTitleAudioUrl(data?.url);
+    return data?.url;
+  }
+
+  const generateVideos = async (SENTENCES, audioUrl) => {
+    console.log('Generating images...', SENTENCES, audioUrl);
 
     try {
       // call Pexels API for each sentence 
       let newSentences = []
-      SENTENCES?.map(async (sentence) => {
+      SENTENCES?.map(async (sentence, idx) => {
         const res = await fetch(`https://api.pexels.com/videos/search?query=${sentence?.imageDescription}&per_page=1&orientation=landscape&size=medium`, {
           headers: {
             Authorization: process.env.NEXT_PUBLIC_PEXELS_API_KEY
@@ -102,11 +114,19 @@ const GenerateVideo = () => {
         const data = await res.json();
         console.log(data?.videos[0]);
 
-        newSentences.push({
-              ...sentence,
-              video: data?.videos[0]
-            }
-        );
+        if(idx === 0) {
+          newSentences.push({
+            ...sentence,
+            video: data?.videos[0],
+            audioUrl: audioUrl
+          })
+        } else {
+          newSentences.push({
+                ...sentence,
+                video: data?.videos[0]
+              }
+          );
+        }
 
         
       })
@@ -127,14 +147,14 @@ const GenerateVideo = () => {
     }
   }
 
-  const generateImages = async (SENTENCES) => {
-    console.log('Generating images...', SENTENCES);
+  const generateImages = async (SENTENCES, audioUrl) => {
+    console.log('Generating images...', SENTENCES, audioUrl);
 
     try {
       // call Pexels API for each sentence 
       let newSentences = []
 
-      SENTENCES.map(async (sentence) => {
+      SENTENCES.map(async (sentence, idx) => {
         const res = await fetch(`https://api.pexels.com/v1/search?query=${sentence?.imageDescription}&per_page=1&orientation=landscape&size=medium`, {
           headers: {
             Authorization: process.env.NEXT_PUBLIC_PEXELS_API_KEY
@@ -143,12 +163,20 @@ const GenerateVideo = () => {
         const data = await res.json();
         console.log(data?.photos[0]);
 
-        newSentences.push({
-              ...sentence,
-              // video: data?.videos[0]
-              photo: data?.photos[0]
-            }
-        );
+        if (idx === 0) {
+          newSentences.push({
+            ...sentence,
+            photo: data?.photos[0],
+            audioUrl: audioUrl
+          })
+        } else {
+          newSentences.push({
+                ...sentence,
+                // video: data?.videos[0]
+                photo: data?.photos[0]
+              }
+          );
+        }
       })
 
 
@@ -176,7 +204,7 @@ const GenerateVideo = () => {
     // 1. Write a script to generate a video based on the video topic with OpenAI's API for a 30 seconds video with 10 sentences. Return a JSON object with the sentences in order with the following properties: id, start, duration, text.
     // 2. For each sentence, find an appropriate image from Unsplash's API. Return a JSON object with the sentences in order with the following properties: id, start, duration, text, image.
     // 3. Map the JSON object and return a Sequence for each sentence with the Subtitle component and the Image component.
-    
+
     await generateScript();
     // await generateImages();
     
@@ -248,7 +276,7 @@ const GenerateVideo = () => {
                 <Box className="video-container" w="lg" style={{position: 'relative'}}>
                 <Player
                   component={GenerateSequence}
-                  inputProps={{ sentences: subtitles, totalDurationInFrames, type: 'video' }}
+                  inputProps={{ sentences: subtitles, totalDurationInFrames, titleAudioUrl, type: 'video' }}
                   durationInFrames={totalDurationInFrames}
                   fps={60}
                   controls
@@ -303,18 +331,18 @@ const GenerateVideo = () => {
     );
 }
 
-const GenerateSequence = ({sentences, totalDurationInFrames, type}) => {
+const GenerateSequence = ({sentences, totalDurationInFrames, titleAudioUrl,  type}) => {
   const sortedSentences = sentences?.sort((a, b) => a?.start - b?.start);
   const frame = useCurrentFrame();
 
   useEffect(() => {
-    console.log('Here', sentences);
-  }, [sentences]);
+    console.log('Here', sentences, titleAudioUrl);
+  }, []);
 
   return (
     <>
     {
-      sortedSentences?.length && sortedSentences?.map((sentence) => {
+      sortedSentences?.length && sortedSentences?.map((sentence, idx) => {
       return (
         <Box key={sentence?.id}>
         <Sequence from={sentence?.start} duration={type === 'video' ? sentence?.video?.durationInFrames : sentence?.photo?.durationInFrames}>
@@ -336,7 +364,13 @@ const GenerateSequence = ({sentences, totalDurationInFrames, type}) => {
           <CustomTTSComponent highlight durationInFrames={type === 'video' ? sentence?.video?.durationInFrames - 40 : sentence?.photo?.durationInFrames - 40}>
             {sentence?.text}
           </CustomTTSComponent>
+          {
+            idx === 0 && (
+              <Audio src={sentence?.audioUrl ? sentence?.audioUrl : ""} />
+            )
+          }
         </Sequence>
+        
         <Sequence from={0} duration={totalDurationInFrames}>
           <AbsoluteFill>
             <Audio src={"https://dl.espressif.com/dl/audio/ff-16b-2c-44100hz.mp3"} 

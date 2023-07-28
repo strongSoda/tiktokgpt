@@ -40,6 +40,35 @@ const getSentences = async (topic) => {
   };
 
 
+  export const getScript = async (topic) => {
+
+    const prompt = `
+    write 2 sentences about interesting things on the topic ${topic}
+    `
+    try {
+      const chatCompletion = await openai.createChatCompletion({
+          model: "gpt-3.5-turbo",
+          messages: [{role: "user", content: prompt}],
+          "temperature": 1
+        });
+        console.log(chatCompletion?.data?.choices[0]?.message?.content);
+        return chatCompletion?.data?.choices[0]?.message?.content;
+
+      // const result = await openai.createCompletion({
+      //   model: "gpt-3.5-turbo",
+      //   prompt: prompt,
+      //   temperature: 1,
+      //   max_tokens: 200,
+      // });
+      // console.log("response", result?.data?.choices[0]?.text);
+      // return result?.data?.choices[0]?.text
+    } catch (e) {
+      console.error(e);
+    }
+
+  }
+
+
 const getPrompt = (topic) => {
   // return a prompt for write a script for a video based on the video topic with OpenAI's API for a 30 seconds video with 10 sentences. Return a valid JSON array of objects with the sentences in order with the following properties: id, start, duration, text, imageDescription where imageDescription is the description of the image appropriate for the sentence from Unsplash's API in max 4 words.
   return `Write a script for a video with on the topic "${topic}". Return a valid JSON array of objects with the sentences in order with the following properties: id, start, durationInFrames (with 60 fps, minimum durationInFrames = 300 ), text, imageDescription. Where imageDescription is the description of the image appropriate for the sentence in max 4 words. The first object is a title for the topic of the video. Also return the totalDurationInFrames of the video in the JSON object.
