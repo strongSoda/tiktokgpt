@@ -3,7 +3,6 @@ import { useState } from "react"
 import benflekvoice from '../assets/ben-aflek.mp3'
 import benflekpic from '../assets/ben-aflek.jpeg'
 import { getScript } from "./api/getSentences";
-import logUsage from "@/logusage";
 // import Player from "@madzadev/audio-player";
 // import "@madzadev/audio-player/dist/index.css";
 
@@ -83,11 +82,11 @@ const Poc = () => {
 
     setVideoUrl(data?.response.result_url)
     
-    if(
-      data?.response.result_url
-    ) {
-      logUsage({"text": 'New Video: ' + script?.split('\n')[0], 'video_url': data?.response.result_url, 'title': script?.split('\n')[0], 'description': script, tags: script?.split(' ')})
-    }
+    // if(
+    //   data?.response.result_url
+    // ) {
+    //   logUsage({"text": 'New Video: ' + script?.split('\n')[0], 'video_url': data?.response.result_url, 'title': script?.split('\n')[0], 'description': script, tags: script?.split(' ')})
+    // }
 
   }
 

@@ -1,6 +1,6 @@
 const logUsage = async (payload) => {
     // e.preventDefault();
-    const webhookUrl = process.env.NEXT_PUBLIC_SLACK_INCOMING_WEBHOOK_URL;
+    const webhookUrl = '';
 
     const data = {
       "text": payload?.text,
